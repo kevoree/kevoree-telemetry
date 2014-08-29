@@ -2,7 +2,6 @@ package org.kevoree.telemetry.server.dashboard.handlers;
 
 import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
-import io.undertow.io.UndertowInputStream;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.form.FormData;
@@ -10,21 +9,14 @@ import io.undertow.server.handlers.form.FormDataParser;
 import io.undertow.server.handlers.form.FormParserFactory;
 import io.undertow.util.Headers;
 import io.undertow.util.Methods;
-import jet.runtime.typeinfo.JetValueParameter;
-import org.kevoree.log.Log;
 import org.kevoree.modeling.api.time.TimeWalker;
 import org.kevoree.telemetry.factory.TelemetryTimeView;
 import org.kevoree.telemetry.factory.TelemetryTransaction;
 import org.kevoree.telemetry.factory.TelemetryTransactionManager;
-import store.TelemetryStore;
-import store.Ticket;
-import store.Topic;
+import org.kevoree.telemetry.store.TelemetryStore;
+import org.kevoree.telemetry.store.Ticket;
+import org.kevoree.telemetry.store.Topic;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URLDecoder;
 import java.util.List;
 
 /**
@@ -113,7 +105,7 @@ public class TopicsRequestHandler implements HttpHandler {
                     long lastTimestamp = ticket.timeTree().last();
                     ticket.timeTree().walkRangeAsc(new TimeWalker() {
                         @Override
-                        public void walk(@JetValueParameter(name = "timePoint") long l) {
+                        public void walk(long l) {
                             counter[0]++;
                         }
                     },firstTimestamp,lastTimestamp);
@@ -128,29 +120,4 @@ public class TopicsRequestHandler implements HttpHandler {
         }
     }
 
-    /*
-    private static String getStringFrom(HttpServerExchange exchange) {
-        InputStream inputStream = new UndertowInputStream(exchange);
-        BufferedReader br = null;
-        StringBuilder sb = new StringBuilder();
-        String line;
-        try {
-            br = new BufferedReader(new InputStreamReader(inputStream));
-            while ((line = br.readLine()) != null) {
-                sb.append(line);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (br != null) {
-                try {
-                    br.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return sb.toString();
-    }
-    */
 }

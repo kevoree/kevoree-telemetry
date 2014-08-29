@@ -29,7 +29,7 @@
                         <configuration>
                             <ecore>model/TelemetryStore.mm</ecore>
                             <timeAware>true</timeAware>
-                            <persistence>true</persistence>
+                            <!--<persistence>true</persistence>-->
                             <metaModelQualifiedName>org.kevoree.telemetry</metaModelQualifiedName>
                         </configuration>
                     </execution>
@@ -37,5 +37,13 @@
             </plugin>
         </plugins>
     </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.kevoree.modeling</groupId>
+            <artifactId>org.kevoree.modeling.microframework</artifactId>
+            <version>${kmf.version}</version>
+        </dependency>
+    </dependencies>
 
 </project>

@@ -9,10 +9,9 @@ import org.kevoree.modeling.datastores.leveldb.LevelDbDataStore;
 import org.kevoree.telemetry.factory.TelemetryTimeView;
 import org.kevoree.telemetry.factory.TelemetryTransaction;
 import org.kevoree.telemetry.factory.TelemetryTransactionManager;
-import org.kevoree.telemetry.server.dashboard.TelemetryDashboardServer;
-import store.TelemetryStore;
-import store.Ticket;
-import store.Topic;
+import org.kevoree.telemetry.store.TelemetryStore;
+import org.kevoree.telemetry.store.Ticket;
+import org.kevoree.telemetry.store.Topic;
 
 import java.io.IOException;
 import java.util.Properties;
@@ -23,7 +22,6 @@ import java.util.Properties;
 public class ExServer {
 
     private TelemetryTransactionManager transactionManager;
-    // private DataStoreWebSocketWrapper dataStoreWrapper;
    private Integer port;
 
     public ExServer(Integer port) {
@@ -41,12 +39,6 @@ public class ExServer {
 
         checkOrCreateStore();
 
-        //dataStoreWrapper = new DataStoreWebSocketWrapper(transactionManager.getDatastore(), port+1);
-        //dataStoreWrapper.start();
-        /*
-        bridge = new WebSocketBridge(transactionManager, port+1);
-        bridge.start();
-        */
         System.out.println("Started Bridge to localhost:" + (port+1));
         Properties configProps = new Properties();
         configProps.put("host", "0.0.0.0");
@@ -62,21 +54,11 @@ public class ExServer {
     }
 
     public void stopServer() {
-        // try {
         messaging.stop();
         m_acceptor.close();
 
-        //dataStoreWrapper.stop(1000);
-        //bridge.stop(1000);
         transactionManager.close();
         System.out.println("Telemetry Server stopped");
-    /*
-    } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        */
     }
 
 
