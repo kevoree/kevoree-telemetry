@@ -10,7 +10,6 @@ var ConsoleHandler = new function() {
     };
 
     var doAddTicket = function(container, ticket) {
-        console.log("AddTicket:", ticket);
         var date = new Date(ticket.timestamp/1000);
 
         var panel = $('<div class="alert" role="alert"><b>From</b> ' + ticket.origin + ' <b>on</b> ' + date.toLocaleDateString()+ ' at ' + date.toLocaleTimeString() + ' :</u><br/>' + ticket.message + ((ticket.hasOwnProperty('stack') && ticket.stack != "")?'<br/>' + ticket.stack : "") + '</div>');

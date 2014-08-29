@@ -50,9 +50,10 @@ public class WebSocketHandler implements WebSocketConnectionCallback {
         webSocketChannel.resumeReceives();
     }
 
-    public void processMessage(String tpc, String payload) {
+    public void processMessage(String tpc, String payload, String path) {
         JsonObject obj = new JsonObject();
         obj.add("topic", tpc);
+        obj.add("path", path);
         obj.add("payload", payload);
         String msg = obj.toString();
         for(String subscription : connections.keySet()) {

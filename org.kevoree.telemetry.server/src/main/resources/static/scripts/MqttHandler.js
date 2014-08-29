@@ -30,6 +30,7 @@ var MqttHandler = function(){
                 ConsoleHandler.addTicket(JSON.parse(parsed.payload));
             }
         }
+        TopicsHandler.messageReceived(parsed)
     };
 
     var onClose = function(evt) {

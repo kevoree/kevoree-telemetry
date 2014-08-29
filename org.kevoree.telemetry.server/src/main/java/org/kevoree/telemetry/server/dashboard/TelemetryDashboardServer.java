@@ -48,8 +48,8 @@ public class TelemetryDashboardServer {
     }
 
 
-    public void processMessage(String topic, String payload) {
-        wsHandler.processMessage(topic, payload);
+    public void processMessage(String topic, String payload, String path) {
+        wsHandler.processMessage(topic, payload, path);
     }
 
     public void start() {

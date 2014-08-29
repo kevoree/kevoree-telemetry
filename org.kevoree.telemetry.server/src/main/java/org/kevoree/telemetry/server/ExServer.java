@@ -62,7 +62,7 @@ public class ExServer {
     }
 
 
-    public void processMessage(String topic, String payload) {
+    public String processMessage(String topic, String payload) {
         Log.debug("[ProcessMessage] Topic:" + topic + " payload:" + payload);
 
         String[] topics = topic.split("/");
@@ -95,6 +95,7 @@ public class ExServer {
             Log.debug("Adding ticket");
         }
         transaction.commit();
+        return ticket.path();
     }
 
 

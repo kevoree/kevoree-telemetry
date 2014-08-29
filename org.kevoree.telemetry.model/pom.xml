@@ -29,7 +29,7 @@
                         <configuration>
                             <ecore>model/TelemetryStore.mm</ecore>
                             <timeAware>true</timeAware>
-                            <!--<persistence>true</persistence>-->
+                            <persistence>true</persistence>
                             <metaModelQualifiedName>org.kevoree.telemetry</metaModelQualifiedName>
                         </configuration>
                     </execution>

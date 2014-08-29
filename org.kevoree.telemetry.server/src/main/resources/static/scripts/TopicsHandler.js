@@ -62,9 +62,6 @@ var TopicsHandler = new function() {
 
     var updateDetails = function(node) {
         var pathV = $(node).attr('data-path');
-        //console.log(path);
-        //var params = {};
-        //params.path = path;
         $.post("/data/topics",{path:pathV})
             .done(function(msg){
                 var parsed = JSON.parse(msg);
@@ -77,8 +74,58 @@ var TopicsHandler = new function() {
             });
     };
 
+
+    var messageReceived = function(parsed) {
+        var topics = parsed.topic.split("/");
+        var currentTopic = topics[0];
+        var topicTree = $(".topicsTree");
+        var ul = topicTree.find("ul").first();
+        if(ul.length == 0) {
+            ul = $('<ul></ul>');
+            ul.appendTo(topicTree);
+        }
+        for(var i = 0; i < topics.length; i++) {
+            if(i==0) {
+                currentTopic = topics[i];
+            } else {
+                currentTopic = currentTopic + "/" + topics[i];
+            }
+            var li = ul.find('li > span[data-topic="'+currentTopic+'"]').parent("li");
+            if(li.length == 0) {
+                li = $("<li></li>");
+                li.appendTo(ul);
+                var textSpan = $("<span>"+topics[i]+"</span>");
+                if(i == topics.length -1) {
+                    textSpan.attr('data-path', parsed.path.substring(0,parsed.path.lastIndexOf("/")));
+                }
+                textSpan.attr('data-topic', currentTopic);
+                textSpan.appendTo(li);
+                ul = $('<ul></ul>');
+                ul.appendTo(li);
+                if(i == topics.length-1) {
+                    textSpan.addClass("detailable");
+                    var span = $("<span class=\"badge pullright\">0</span>");
+                    span.appendTo(textSpan);
+                    registerTreeClickListeners(topicTree);
+                }
+            }
+            if(i == topics.length-1) {
+                var badge = li.find("span.badge");
+                badge.text(parseInt(badge.text())+1);
+            } else {
+                ul = li.find("ul").first();
+                if(ul.length == 0) {
+                    ul = $('<ul></ul>');
+                    ul.appendTo(li);
+                }
+            }
+        }
+    };
+
+
     return {
-        init : initialize
+        init : initialize,
+        messageReceived : messageReceived
     };
 
 

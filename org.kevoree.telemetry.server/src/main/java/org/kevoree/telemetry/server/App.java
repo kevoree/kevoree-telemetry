@@ -58,8 +58,8 @@ public class App {
             public void onPublish(UTF8Buffer topi, Buffer body, Runnable ack) {
                 String topic = topi.utf8().toString();
                 String payload = body.utf8().toString();
-                server.processMessage(topic, payload);
-                dashboardServer.processMessage(topic, payload);
+                String path = server.processMessage(topic, payload);
+                dashboardServer.processMessage(topic, payload, path);
                 /*
                 String payload = new String(body.utf8().toString());
                 System.out.println(topic.utf8());
