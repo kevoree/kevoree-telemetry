@@ -22,9 +22,7 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingDeque;
 import org.dna.mqtt.moquette.messaging.spi.IPersistentSubscriptionStore;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.kevoree.log.Log;
 
 /**
  * Represents a tree of topics subscriptions.
@@ -32,15 +30,15 @@ import org.slf4j.LoggerFactory;
  * @author andrea
  */
 public class SubscriptionsStore {
-    
+
     public static interface IVisitor<T> {
         void visit(TreeNode node);
-        
+
         T getResult();
     }
-    
+
     private class DumpTreeVisitor implements IVisitor<String> {
-        
+
         String s = "";
 
         public void visit(TreeNode node) {
@@ -51,27 +49,27 @@ public class SubscriptionsStore {
             s += node.getToken() == null ? "" : node.getToken().toString();
             s += subScriptionsStr + "\n";
         }
-        
+
         public String getResult() {
             return s;
         }
     }
-    
+
     private class SubscriptionTreeCollector implements IVisitor<List<Subscription>> {
-        
+
         private List<Subscription> m_allSubscriptions = new ArrayList<Subscription>();
 
         public void visit(TreeNode node) {
             m_allSubscriptions.addAll(node.subscriptions());
         }
-        
+
         public List<Subscription> getResult() {
             return m_allSubscriptions;
         }
     }
 
     private TreeNode subscriptions = new TreeNode(null);
-    private static final Logger LOG = LoggerFactory.getLogger(SubscriptionsStore.class);
+    //private static final Logger LOG = LoggerFactory.getLogger(SubscriptionsStore.class);
 
     private IPersistentSubscriptionStore m_storageService;
 
@@ -80,36 +78,32 @@ public class SubscriptionsStore {
      * client's topics subscriptions
      */
     public void init(IPersistentSubscriptionStore storageService) {
-        LOG.debug("init invoked");
+        Log.info("Initializing MQTT Subscription Store");
 
         m_storageService = storageService;
 
         //reload any subscriptions persisted
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Reloading all stored subscriptions...subscription tree before {}", dumpTree());
-        }
-        
+        Log.trace("Reloading all stored subscriptions...subscription tree before {}", dumpTree());
+
         for (Subscription subscription : m_storageService.retrieveAllSubscriptions()) {
-            LOG.debug("Re-subscribing {} to topic {}", subscription.getClientId(), subscription.getTopic());
+            Log.trace("Re-subscribing {} to topic {}", subscription.getClientId(), subscription.getTopic());
             addDirect(subscription);
         }
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Finished loading. Subscription tree after {}", dumpTree());
-        }
+        Log.trace("Finished loading. Subscription tree after {}", dumpTree());
     }
-    
+
     protected void addDirect(Subscription newSubscription) {
         TreeNode current = findMatchingNode(newSubscription.topic);
         current.addSubscription(newSubscription);
     }
-    
+
     private TreeNode findMatchingNode(String topic) {
         List<Token> tokens = new ArrayList<Token>();
         try {
             tokens = splitTopic(topic);
         } catch (ParseException ex) {
             //TODO handle the parse exception
-            LOG.error(null, ex);
+            Log.error(null, ex);
 //            return;
         }
 
@@ -142,7 +136,7 @@ public class SubscriptionsStore {
 
     public void removeSubscription(String topic, String clientID) {
         TreeNode matchNode = findMatchingNode(topic);
-        
+
         //search for the subscription to remove
         Subscription toBeRemoved = null;
         for (Subscription sub : matchNode.subscriptions()) {
@@ -151,19 +145,19 @@ public class SubscriptionsStore {
                 break;
             }
         }
-        
+
         if (toBeRemoved != null) {
             matchNode.subscriptions().remove(toBeRemoved);
         }
     }
-    
+
     /**
      * TODO implement testing
      */
     public void clearAllSubscriptions() {
         SubscriptionTreeCollector subsCollector = new SubscriptionTreeCollector();
         bfsVisit(subscriptions, subsCollector);
-        
+
         List<Subscription> allSubscriptions = subsCollector.getResult();
         for (Subscription subscription : allSubscriptions) {
             removeSubscription(subscription.getTopic(), subscription.getClientId());
@@ -185,7 +179,7 @@ public class SubscriptionsStore {
     }
 
     public void activate(String clientID) {
-        LOG.debug("Activating subscriptions for clientID <{}>", clientID);
+        Log.trace("Activating subscriptions for clientID <{}>", clientID);
         subscriptions.activate(clientID);
     }
 
@@ -200,7 +194,7 @@ public class SubscriptionsStore {
             tokens = splitTopic(topic);
         } catch (ParseException ex) {
             //TODO handle the parse exception
-            LOG.error(null, ex);
+            Log.error(null, ex);
             return Collections.EMPTY_LIST;
         }
 
@@ -217,13 +211,13 @@ public class SubscriptionsStore {
     public int size() {
         return subscriptions.size();
     }
-    
+
     public String dumpTree() {
         DumpTreeVisitor visitor = new DumpTreeVisitor();
         bfsVisit(subscriptions, visitor);
         return visitor.getResult();
     }
-    
+
     private void bfsVisit(TreeNode node, IVisitor visitor) {
         if (node == null) {
             return;
@@ -233,7 +227,7 @@ public class SubscriptionsStore {
             bfsVisit(child, visitor);
         }
     }
-    
+
     /**
      * Verify if the 2 topics matching respecting the rules of MQTT Appendix A
      */
@@ -269,11 +263,11 @@ public class SubscriptionsStore {
 //            }
             return i == msgTokens.size();
         } catch (ParseException ex) {
-            LOG.error(null, ex);
+            Log.error(null, ex);
             throw new RuntimeException(ex);
         }
     }
-    
+
     protected static List<Token> splitTopic(String topic) throws ParseException {
         List res = new ArrayList<Token>();
         String[] splitted = topic.split("/");
@@ -281,15 +275,15 @@ public class SubscriptionsStore {
         if (splitted.length == 0) {
             res.add(Token.EMPTY);
         }
-        
+
         if (topic.endsWith("/")) {
             //Add a fictious space 
             String[] newSplitted = new String[splitted.length + 1];
-            System.arraycopy(splitted, 0, newSplitted, 0, splitted.length); 
+            System.arraycopy(splitted, 0, newSplitted, 0, splitted.length);
             newSplitted[splitted.length] = "";
             splitted = newSplitted;
         }
-        
+
         for (int i = 0; i < splitted.length; i++) {
             String s = splitted[i];
             if (s.isEmpty()) {

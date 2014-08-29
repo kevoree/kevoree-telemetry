@@ -51,8 +51,7 @@ import org.dna.mqtt.moquette.parser.netty.MQTTDecoder;
 import org.dna.mqtt.moquette.parser.netty.MQTTEncoder;
 import org.dna.mqtt.moquette.server.ServerAcceptor;
 import org.dna.mqtt.moquette.server.netty.metrics.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.kevoree.log.Log;;
 
 /**
  *
@@ -79,9 +78,7 @@ public class NettyAcceptor implements ServerAcceptor {
             out.add(bb);
         }
     }
-    
-    private static final Logger LOG = LoggerFactory.getLogger(NettyAcceptor.class);
-    
+
     EventLoopGroup m_bossGroup;
     EventLoopGroup m_workerGroup;
     //BytesMetricsCollector m_metricsCollector = new BytesMetricsCollector();
@@ -131,10 +128,10 @@ public class NettyAcceptor implements ServerAcceptor {
             // Bind and start to accept incoming connections.
 //            ChannelFuture f = b.bind(Constants.PORT);
             ChannelFuture f = b.bind(props.getProperty("host"), Integer.parseInt(props.getProperty("port")));
-            LOG.info("Server binded");
+            Log.info("MQTT Server ready.");
             f.sync();
         } catch (InterruptedException ex) {
-            LOG.error(null, ex);
+            Log.error(null, ex);
         }
     }
     
@@ -142,7 +139,7 @@ public class NettyAcceptor implements ServerAcceptor {
         String webSocketPortProp = props.getProperty("websocket_port");
         if (webSocketPortProp == null) {
             //Do nothing no WebSocket configured
-            LOG.info("WebSocket is disabled");
+            Log.debug("WebSocket is disabled");
             return;
         }
         int port = Integer.parseInt(webSocketPortProp);
@@ -180,7 +177,7 @@ public class NettyAcceptor implements ServerAcceptor {
             System.out.println("Open your browser and navigate to http://localhost:" + port + '/');
             f.sync();
         } catch (InterruptedException ex) {
-            LOG.error(null, ex);
+            Log.error(null, ex);
         }
     }
     
@@ -189,13 +186,13 @@ public class NettyAcceptor implements ServerAcceptor {
         String sslPortProp = props.getProperty("ssl_port");
         if (sslPortProp == null) {
             //Do nothing no SSL configured
-            LOG.info("SSL is disabled");
+            Log.debug("SSL is disabled");
             return;
         }
         final String jksPath = props.getProperty("jks_path");
         if (jksPath == null || jksPath.isEmpty()) {
             //key_store_password or key_manager_password are empty
-            LOG.warn("You have configured the SSL port but not the jks_path, SSL not started");
+            Log.warn("You have configured the SSL port but not the jks_path, SSL not started");
             return;
         }
         
@@ -205,12 +202,12 @@ public class NettyAcceptor implements ServerAcceptor {
         final String keyManagerPassword = props.getProperty("key_manager_password");
         if (keyStorePassword == null || keyStorePassword.isEmpty()) {
             //key_store_password or key_manager_password are empty
-            LOG.warn("You have configured the SSL port but not the key_store_password, SSL not started");
+            Log.warn("You have configured the SSL port but not the key_store_password, SSL not started");
             return;
         }
         if (keyManagerPassword == null || keyManagerPassword.isEmpty()) {
             //key_manager_password or key_manager_password are empty
-            LOG.warn("You have configured the SSL port but not the key_manager_password, SSL not started");
+            Log.warn("You have configured the SSL port but not the key_manager_password, SSL not started");
             return;
         }
         
@@ -256,10 +253,10 @@ public class NettyAcceptor implements ServerAcceptor {
             // Bind and start to accept incoming connections.
 //            ChannelFuture f = b.bind(Constants.PORT);
             ChannelFuture f = b.bind(props.getProperty("host"), sslPort);
-            LOG.info("Server binded");
+            Log.info("MQTT Server ready.");
             f.sync();
         } catch (InterruptedException ex) {
-            LOG.error(null, ex);
+            Log.error(null, ex);
         }
     }
 
@@ -274,8 +271,8 @@ public class NettyAcceptor implements ServerAcceptor {
         m_bossGroup.shutdownGracefully();
 
         MessageMetrics metrics = m_metricsCollector.computeMetrics();
-        //LOG.info(String.format("Bytes read: %d, bytes wrote: %d", metrics.readBytes(), metrics.wroteBytes()));
-        LOG.info("Msg read: {}, msg wrote: {}", metrics.messagesRead(), metrics.messagesWrote());
+        //Log.debug(String.format("Bytes read: %d, bytes wrote: %d", metrics.readBytes(), metrics.wroteBytes()));
+        Log.debug("Msg read: {}, msg wrote: {}", metrics.messagesRead(), metrics.messagesWrote());
     }
     
 }

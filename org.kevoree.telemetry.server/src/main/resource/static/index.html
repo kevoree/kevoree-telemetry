@@ -1,0 +1,48 @@
+<html>
+<head>
+    <title></title>
+
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <link href="css/tree.css" rel="stylesheet" type="text/css" media="screen" />
+
+    <script src="//code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script src="scripts/TopicsHandler.js"></script>
+    <script src="scripts/ConsoleHandler.js"></script>
+    <script src="scripts/MqttHandler.js"></script>
+
+</head>
+<body>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="tree well topicsTree"></div>
+        </div>
+        <div class="col-md-7">
+            <div id="detailContainer">
+                <div id="detailsHeader"></div>
+                <div class="panel panel-default console">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Console</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div id="consoleControls"></div>
+                        <div id="consoleContents"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<script language="javascript">
+    $(document).ready(function() {
+        TopicsHandler.init();
+        MqttHandler.init();
+    });
+</script>
+</body>
+</html>

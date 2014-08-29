@@ -6,8 +6,8 @@
     <artifactId>org.kevoree.telemetry.server</artifactId>
     <packaging>jar</packaging>
     <version>1-SNAPSHOT</version>
-    <name>Kevoree :: Telemetry :: Server</name>
 
+    <name>Kevoree :: Telemetry :: Server</name>
 
     <parent>
         <groupId>org.kevoree.telemetry</groupId>
@@ -49,7 +49,7 @@
         </dependency>
         <dependency>
             <groupId>org.kevoree.log</groupId>
-            <artifactId>org.kevoree.log.compat.slf4j</artifactId>
+            <artifactId>org.kevoree.log</artifactId>
             <version>1</version>
         </dependency>
         <dependency>
@@ -77,6 +77,27 @@
             <artifactId>minimal-json</artifactId>
             <version>0.9.1</version>
         </dependency>
+        <dependency>
+            <groupId>org.kevoree.modeling</groupId>
+            <artifactId>org.kevoree.modeling.microframework</artifactId>
+            <version>${kmf.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.kevoree.modeling</groupId>
+            <artifactId>org.kevoree.modeling.microframework.datastores.leveldb</artifactId>
+            <version>${kmf.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.kevoree.telemetry</groupId>
+            <artifactId>org.kevoree.telemetry.model</artifactId>
+            <version>1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>io.undertow</groupId>
+            <artifactId>undertow-core</artifactId>
+            <version>1.0.15.Final</version>
+        </dependency>
     </dependencies>
+
 
 </project>

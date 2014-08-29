@@ -28,6 +28,10 @@
         <version>7</version>
     </parent>
 
+    <properties>
+        <kmf.version>3.5.0</kmf.version>
+    </properties>
+
     <developers>
         <developer>
             <name>Francois Fouquet</name>
@@ -42,6 +46,8 @@
     </developers>
 
     <modules>
+        <module>org.kevoree.telemetry.model</module>
+        <module>org.kevoree.telemetry.modeljs</module>
         <module>org.kevoree.telemetry.server</module>
     </modules>
 
@@ -111,6 +117,19 @@
             </plugin>
         </plugins>
     </build>
+    <repositories>
+        <repository>
+            <id>kevoree.oss.release</id>
+            <url>https://oss.sonatype.org/content/repositories/</url>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>kevoree.oss.release</id>
+            <url>https://oss.sonatype.org/content/repositories/</url>
+        </pluginRepository>
+    </pluginRepositories>
 
     <distributionManagement>
         <repository>

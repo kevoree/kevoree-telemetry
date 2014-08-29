@@ -24,8 +24,7 @@ import java.io.Reader;
 import java.text.ParseException;
 import java.util.Properties;
 import org.dna.mqtt.commons.Constants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.kevoree.log.Log;
 
 /**
  * Mosquitto configuration parser.
@@ -35,13 +34,13 @@ import org.slf4j.LoggerFactory;
  * 
  * @author andrea
  */
-class ConfigurationParser {
+public class ConfigurationParser {
     
-    private static final Logger LOG = LoggerFactory.getLogger(ConfigurationParser.class);
+    //private static final Logger LOG = LoggerFactory.getLogger(ConfigurationParser.class);
     
     private Properties m_properties = new Properties();
     
-    ConfigurationParser() {
+    public ConfigurationParser() {
         m_properties.put("port", Integer.toString(Constants.PORT));
         m_properties.put("host", Constants.HOST);
         m_properties.put("password_file", "");
@@ -50,20 +49,20 @@ class ConfigurationParser {
     /**
      * Parse the configuration from file.
      */
-    void parse(File file) throws ParseException {
+    public void parse(File file) throws ParseException {
         if (file == null) {
-            LOG.warn("parsing NULL file, so fallback on default configuration!");
+            Log.warn("parsing NULL file, so fallback on default configuration!");
             return;
         }
         if (!file.exists()) {
-            LOG.warn(String.format("parsing not existing file %s, so fallback on default configuration!", file.getAbsolutePath()));
+            Log.warn(String.format("parsing not existing file %s, so fallback on default configuration!", file.getAbsolutePath()));
             return;
         }
         try {
             FileReader reader = new FileReader(file);
             parse(reader);
         } catch (FileNotFoundException fex) {
-            LOG.warn(String.format("parsing not existing file %s, so fallback on default configuration!", file.getAbsolutePath()), fex);
+            Log.warn(String.format("parsing not existing file %s, so fallback on default configuration!", file.getAbsolutePath()), fex);
             return;
         }
     }
@@ -76,7 +75,7 @@ class ConfigurationParser {
     void parse(Reader reader) throws ParseException {
         if (reader == null) {
             //just log and return default properties
-            LOG.warn("parsing NULL reader, so fallback on default configuration!");
+            Log.warn("parsing NULL reader, so fallback on default configuration!");
             return;
         }
         
@@ -112,7 +111,7 @@ class ConfigurationParser {
         }
     }
     
-    Properties getProperties() {
+    public Properties getProperties() {
         return m_properties;
     }
 }
