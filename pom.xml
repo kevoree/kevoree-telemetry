@@ -29,7 +29,7 @@
     </parent>
 
     <properties>
-        <kmf.version>3.5.0</kmf.version>
+        <kmf.version>3.5.1-SNAPSHOT</kmf.version>
     </properties>
 
     <developers>

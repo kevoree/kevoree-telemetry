@@ -11,12 +11,10 @@ import java.util.HashMap;
  */
 public class DataRequestHandler implements HttpHandler {
 
-    private TelemetryTransactionManager transactionManager;
     private TopicsRequestHandler topicsHandler;
 
-    public DataRequestHandler(TelemetryTransactionManager transactionManager) {
-        this.transactionManager = transactionManager;
-        topicsHandler = new TopicsRequestHandler(transactionManager);
+    public DataRequestHandler() {
+        topicsHandler = new TopicsRequestHandler();
     }
 
     @Override

@@ -12,41 +12,32 @@ import io.undertow.util.Methods;
 import org.kevoree.modeling.api.time.TimeWalker;
 import org.kevoree.telemetry.factory.TelemetryTimeView;
 import org.kevoree.telemetry.factory.TelemetryTransaction;
-import org.kevoree.telemetry.factory.TelemetryTransactionManager;
+import org.kevoree.telemetry.server.TelemetryServerKernel;
+import org.kevoree.telemetry.store.LogTicket;
+import org.kevoree.telemetry.store.Node;
 import org.kevoree.telemetry.store.TelemetryStore;
-import org.kevoree.telemetry.store.Ticket;
-import org.kevoree.telemetry.store.Topic;
 
-import java.util.List;
 
 /**
  * Created by gregory.nain on 27/08/2014.
  */
 public class TopicsRequestHandler implements HttpHandler {
 
-    private TelemetryTransactionManager transactionManager;
-
-    public TopicsRequestHandler(TelemetryTransactionManager transactionManager) {
-        this.transactionManager = transactionManager;
-    }
-
     @Override
     public void handleRequest(HttpServerExchange httpServerExchange) throws Exception {
         //System.out.println("[TopicsRequestHandler] Requested:" + httpServerExchange.getRequestPath());
         if(httpServerExchange.getRequestMethod() == Methods.GET) {
             httpServerExchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/json");
-            TelemetryTransaction transaction = transactionManager.createTransaction();
+            TelemetryTransaction transaction = TelemetryServerKernel.getTransactionManager().createTransaction();
             TelemetryTimeView view = transaction.time(System.nanoTime()/1000);
             TelemetryStore store = (TelemetryStore) view.lookup("/");
 
             JsonArray response = new JsonArray();
-            for(Topic t : store.getTopics()) {
-                JsonObject rootTopic = new JsonObject();
-                rootTopic.add("name", t.getName());
-                rootTopic.add("path", t.path());
-                collectTopics(t, rootTopic);
-                response.add(rootTopic);
-            }
+            JsonObject rootTopic = new JsonObject();
+            rootTopic.add("name", "Nodes");
+            rootTopic.add("path", "/nodes[*]");
+            collectTopics(store, rootTopic);
+            response.add(rootTopic);
             String sending = response.toString();
             //Log.debug(sending);
             httpServerExchange.getResponseSender().send(sending);
@@ -58,15 +49,15 @@ public class TopicsRequestHandler implements HttpHandler {
                 parser.parse(this);
             } else  {
                 String path = formData.get("path").getFirst().getValue();
-                TelemetryTransaction transaction = transactionManager.createTransaction();
+                TelemetryTransaction transaction = TelemetryServerKernel.getTransactionManager().createTransaction();
                 TelemetryTimeView view = transaction.time(System.nanoTime()/1000);
-                Topic topic  = (Topic) view.lookup(path);
+                Node topic  = (Node) view.lookup(path);
                 if(topic != null) {
                     JsonObject response = new JsonObject();
                     response.add("path",topic.path());
 
                     JsonArray ticketsArray = new JsonArray();
-                    Ticket currentTicket = topic.getTicket();
+                    LogTicket currentTicket = topic.getLog();
                     int numTickets = 0;
                     while (currentTicket != null && numTickets < 100) {
                         JsonObject ticket = new JsonObject();
@@ -90,15 +81,14 @@ public class TopicsRequestHandler implements HttpHandler {
 
     }
 
-    private void collectTopics(Topic t, JsonObject container) {
-        List<Topic> subTopics = t.getTopics();
-        if(subTopics.size()>0) {
+    private void collectTopics(TelemetryStore store, JsonObject container) {
+
             JsonArray subs = new JsonArray();
-            for(Topic s :subTopics) {
+            for(Node node : store.getNodes()) {
                 JsonObject topicJson = new JsonObject();
-                topicJson.add("name", s.getName());
-                topicJson.add("path", s.path());
-                Ticket ticket = s.getTicket();
+                topicJson.add("name", node.getName());
+                topicJson.add("path", node.path());
+                LogTicket ticket = node.getLog();
                 if(ticket != null) {
                     final int[] counter = new int[1];
                     long firstTimestamp = ticket.timeTree().first();
@@ -113,11 +103,10 @@ public class TopicsRequestHandler implements HttpHandler {
                     topicJson.add("oldest", firstTimestamp);
                     topicJson.add("latest", lastTimestamp);
                 }
-                collectTopics(s, topicJson);
                 subs.add(topicJson);
             }
-            container.add("subtopics", subs);
-        }
+            container.add("nodes", subs);
+
     }
 
 }

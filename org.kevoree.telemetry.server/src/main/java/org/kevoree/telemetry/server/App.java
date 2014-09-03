@@ -27,21 +27,20 @@ public class App {
                 return logger;
             }
         });
-        Log.set(Log.LEVEL_TRACE);
+        Log.set(Log.LEVEL_DEBUG);
+        Log.setPrintCaller(true);
 
-        final ExServer server = new ExServer(port);
-        final MQTT mqtt = new MQTT();
-        final TelemetryDashboardServer dashboardServer;
+        TelemetryServerKernel.setMqttClient(new MQTT());
+        TelemetryServerKernel.setExServer(new ExServer(port));
+        TelemetryServerKernel.getExServer().startServer();
 
-        server.startServer();
+        TelemetryServerKernel.setDashboardServer(new TelemetryDashboardServer());
+        TelemetryServerKernel.getDashboardServer().start();
 
-        dashboardServer = new TelemetryDashboardServer(server.getTransactionManager());
-        dashboardServer.start();
-
-        mqtt.setClientId("master");
-        mqtt.setCleanSession(true);
-        mqtt.setHost("tcp://localhost:" + port);
-        final CallbackConnection connection = mqtt.callbackConnection();
+        TelemetryServerKernel.getMqttClient().setClientId("master");
+        TelemetryServerKernel.getMqttClient().setCleanSession(true);
+        TelemetryServerKernel.getMqttClient().setHost("tcp://localhost:" + port);
+        final CallbackConnection connection = TelemetryServerKernel.getMqttClient().callbackConnection();
         connection.listener(new Listener() {
 
             @Override
@@ -58,8 +57,8 @@ public class App {
             public void onPublish(UTF8Buffer topi, Buffer body, Runnable ack) {
                 String topic = topi.utf8().toString();
                 String payload = body.utf8().toString();
-                String path = server.processMessage(topic, payload);
-                dashboardServer.processMessage(topic, payload, path);
+                String path = TelemetryServerKernel.getExServer().processMessage(topic, payload);
+                TelemetryServerKernel.getDashboardServer().processMessage(topic, payload, path);
                 /*
                 String payload = new String(body.utf8().toString());
                 System.out.println(topic.utf8());
@@ -105,8 +104,8 @@ public class App {
 
         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
             public void run() {
-                dashboardServer.stop();
-                server.stopServer();
+                TelemetryServerKernel.getDashboardServer().stop();
+                TelemetryServerKernel.getExServer().stopServer();
             }
         }));
     }

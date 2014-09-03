@@ -14,23 +14,41 @@
 </head>
 <body>
 
+<div class="page-header">
+    <h1 style="margin-left: 25px">Kevoree Telemetry Service</h1>
+</div>
 <div class="container-fluid">
     <div class="row">
-        <div class="col-md-3">
+        <div class="col-md-offset-1 col-md-3">
             <div class="tree well topicsTree"></div>
         </div>
         <div class="col-md-7">
             <div id="detailContainer">
                 <div id="detailsHeader"></div>
-                <div class="panel panel-default console">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Console</h3>
+                <ul class="nav nav-tabs" role="tablist">
+                    <li class="active"><a href="#console" data-toggle="tab"><h3 class="panel-title">Console</h3></a></li>
+                    <li><a href="#memory" data-toggle="tab"><h3 class="panel-title">Memory</h3></a></li>
+                    <li><a href="#cpu" data-toggle="tab"><h3 class="panel-title">CPU</h3></a></li>
+                    <li><a href="#threads" data-toggle="tab"><h3 class="panel-title">Threads</h3></a></li>
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane fade in active panel panel-default console" id="console">
+                        <div class="panel-heading" >
+                            <button type="button" class="btn btn-sm btn-danger" id="errorFilter">Error</button>
+                            <button type="button" class="btn btn-sm btn-warning" id="debugFilter">Debug</button>
+                            <button type="button" class="btn btn-sm btn-info" id="infoFilter">Info</button>
+                            <button type="button" class="btn btn-sm btn-success" id="noneFilter">All</button>
+                        </div>
+                        <div class="panel-body">
+                            <div id="consoleControls"></div>
+                            <div id="consoleContents"></div>
+                        </div>
                     </div>
-                    <div class="panel-body">
-                        <div id="consoleControls"></div>
-                        <div id="consoleContents"></div>
-                    </div>
+                    <div class="tab-pane fade" id="memory"><h2>SooN</h2></div>
+                    <div class="tab-pane fade" id="cpu"><h2>SooN</h2></div>
+                    <div class="tab-pane fade" id="threads"><h2>SooN</h2></div>
                 </div>
+
             </div>
         </div>
 
@@ -42,6 +60,7 @@
     $(document).ready(function() {
         TopicsHandler.init();
         MqttHandler.init();
+        ConsoleHandler.init();
     });
 </script>
 </body>

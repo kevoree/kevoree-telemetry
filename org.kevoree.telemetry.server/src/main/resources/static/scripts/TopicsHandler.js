@@ -22,17 +22,17 @@ var TopicsHandler = new function() {
             textSpan.attr('data-path', e.path);
             var parentSpan = parent.find('span[data-topic]');
             if(parentSpan.length != 0) {
-                textSpan.attr('data-topic', parentSpan.attr('data-topic') + "/" + e.name);
+                textSpan.attr('data-topic', parentSpan.attr('data-topic') + "/" + e.name.toLowerCase());
             } else {
-                textSpan.attr('data-topic', e.name);
+                textSpan.attr('data-topic', e.name.toLowerCase());
             }
             textSpan.appendTo(liElem);
             if(e.hasOwnProperty('nbtickets')) {
                 textSpan.addClass("detailable");
                 $("<span class=\"badge pullright\">" + e.nbtickets + "</span>").appendTo(textSpan);
             }
-            if(e.subtopics !== 'undefined') {
-                refreshTopicsTree(liElem, e.subtopics);
+            if(e.nodes !== 'undefined') {
+                refreshTopicsTree(liElem, e.nodes);
             }
             liElem.appendTo(ulElem);
         }
@@ -78,47 +78,51 @@ var TopicsHandler = new function() {
     var messageReceived = function(parsed) {
         var topics = parsed.topic.split("/");
         var currentTopic = topics[0];
-        var topicTree = $(".topicsTree");
-        var ul = topicTree.find("ul").first();
-        if(ul.length == 0) {
-            ul = $('<ul></ul>');
-            ul.appendTo(topicTree);
-        }
-        for(var i = 0; i < topics.length; i++) {
-            if(i==0) {
-                currentTopic = topics[i];
-            } else {
-                currentTopic = currentTopic + "/" + topics[i];
-            }
-            var li = ul.find('li > span[data-topic="'+currentTopic+'"]').parent("li");
-            if(li.length == 0) {
-                li = $("<li></li>");
-                li.appendTo(ul);
-                var textSpan = $("<span>"+topics[i]+"</span>");
-                if(i == topics.length -1) {
-                    textSpan.attr('data-path', parsed.path.substring(0,parsed.path.lastIndexOf("/")));
-                }
-                textSpan.attr('data-topic', currentTopic);
-                textSpan.appendTo(li);
+        if(currentTopic.length == 2) {
+            var topicTree = $(".topicsTree");
+            var ul = topicTree.find("ul").first();
+            if(ul.length == 0) {
                 ul = $('<ul></ul>');
-                ul.appendTo(li);
-                if(i == topics.length-1) {
-                    textSpan.addClass("detailable");
-                    var span = $("<span class=\"badge pullright\">0</span>");
-                    span.appendTo(textSpan);
-                    registerTreeClickListeners(topicTree);
-                }
+                ul.appendTo(topicTree);
             }
-            if(i == topics.length-1) {
-                var badge = li.find("span.badge");
-                badge.text(parseInt(badge.text())+1);
-            } else {
-                ul = li.find("ul").first();
-                if(ul.length == 0) {
+            for(var i = 0; i < topics.length; i++) {
+                if(i==0) {
+                    currentTopic = topics[i];
+                } else {
+                    currentTopic = currentTopic + "/" + topics[i];
+                }
+                var li = ul.find('li > span[data-topic="'+currentTopic+'"]').parent("li");
+                if(li.length == 0) {
+                    li = $("<li></li>");
+                    li.appendTo(ul);
+                    var textSpan = $("<span>"+topics[i]+"</span>");
+                    if(i == topics.length -1) {
+                        textSpan.attr('data-path', parsed.path.substring(0,parsed.path.lastIndexOf("/")));
+                    }
+                    textSpan.attr('data-topic', currentTopic);
+                    textSpan.appendTo(li);
                     ul = $('<ul></ul>');
                     ul.appendTo(li);
+                    if(i == topics.length-1) {
+                        textSpan.addClass("detailable");
+                        var span = $("<span class=\"badge pullright\">0</span>");
+                        span.appendTo(textSpan);
+                        registerTreeClickListeners(topicTree);
+                    }
+                }
+                if(i == topics.length-1) {
+                    var badge = li.find("span.badge");
+                    badge.text(parseInt(badge.text())+1);
+                } else {
+                    ul = li.find("ul").first();
+                    if(ul.length == 0) {
+                        ul = $('<ul></ul>');
+                        ul.appendTo(li);
+                    }
                 }
             }
+        } else {
+            console.log("Message Received:", parsed)
         }
     };
 

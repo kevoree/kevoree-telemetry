@@ -39,7 +39,33 @@ var ConsoleHandler = new function() {
        doAddTicket($('div#consoleContents'), ticket);
     };
 
+    var init = function() {
+        $("#errorFilter").on("click", function() {
+            var selector = 'div.alert-danger';
+            var consoleContent = $('div#consoleContents');
+            consoleContent.find(':not('+selector+')').hide();
+            consoleContent.find(selector).show();
+        });
+        $("#debugFilter").on("click", function() {
+            var selector = 'div.alert-danger, div.alert-warning';
+            var consoleContent = $('div#consoleContents');
+            consoleContent.find(':not('+selector+')').hide();
+            consoleContent.find(selector).show();
+        });
+        $("#infoFilter").on("click", function() {
+            var selector = 'div.alert-danger, div.alert-warning, div.alert-info';
+            var consoleContent = $('div#consoleContents');
+            consoleContent.find(':not('+selector+')').hide();
+            consoleContent.find(selector).show();
+        });
+        $("#noneFilter").on("click", function() {
+            var consoleContent = $('div#consoleContents');
+            consoleContent.find('div.alert').show();
+        });
+    };
+
     return {
+        init :init,
         replaceContent : replaceContent,
         addTicket: addTicket
     }

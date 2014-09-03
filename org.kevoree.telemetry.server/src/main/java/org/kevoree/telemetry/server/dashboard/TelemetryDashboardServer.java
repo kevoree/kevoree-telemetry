@@ -9,6 +9,7 @@ import io.undertow.websockets.WebSocketConnectionCallback;
 import io.undertow.websockets.core.*;
 import io.undertow.websockets.spi.WebSocketHttpExchange;
 import org.kevoree.telemetry.factory.TelemetryTransactionManager;
+import org.kevoree.telemetry.server.TelemetryServerKernel;
 import org.kevoree.telemetry.server.dashboard.handlers.DataRequestHandler;
 import org.kevoree.telemetry.server.dashboard.handlers.WebSocketHandler;
 
@@ -22,12 +23,10 @@ import java.net.URISyntaxException;
  */
 public class TelemetryDashboardServer {
 
-    private TelemetryTransactionManager transactionManager;
     private Undertow server;
     private WebSocketHandler wsHandler = new WebSocketHandler();
 
-    public TelemetryDashboardServer(TelemetryTransactionManager transactionManager) {
-        this.transactionManager = transactionManager;
+    public TelemetryDashboardServer() {
 
         PathHandler handler = Handlers.path();
         FileResourceManager mgr = null;
@@ -39,7 +38,7 @@ public class TelemetryDashboardServer {
         HttpHandler resourceHandler = Handlers.resource(mgr);
 
         handler.addPrefixPath("/", resourceHandler);
-        handler.addPrefixPath("/data", new DataRequestHandler(transactionManager));
+        handler.addPrefixPath("/data", new DataRequestHandler());
         handler.addExactPath("/mqtt",Handlers.websocket(wsHandler));
 
         server = Undertow.builder()
