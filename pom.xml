@@ -120,14 +120,22 @@
     <repositories>
         <repository>
             <id>kevoree.oss.release</id>
-            <url>https://oss.sonatype.org/content/repositories/</url>
+            <url>https://oss.sonatype.org/content/repositories/releases/</url>
+        </repository>
+        <repository>
+            <id>kevoree.oss.snaps</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
         </repository>
     </repositories>
 
     <pluginRepositories>
         <pluginRepository>
             <id>kevoree.oss.release</id>
-            <url>https://oss.sonatype.org/content/repositories/</url>
+            <url>https://oss.sonatype.org/content/repositories/releases/</url>
+        </pluginRepository>
+        <pluginRepository>
+            <id>kevoree.oss.snaps</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
         </pluginRepository>
     </pluginRepositories>
 

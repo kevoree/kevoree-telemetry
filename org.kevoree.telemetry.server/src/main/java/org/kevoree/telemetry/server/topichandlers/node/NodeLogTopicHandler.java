@@ -1,10 +1,12 @@
 package org.kevoree.telemetry.server.topichandlers.node;
 
 import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.ParseException;
 import org.kevoree.log.Log;
 import org.kevoree.telemetry.factory.TelemetryTimeView;
 import org.kevoree.telemetry.factory.TelemetryTransaction;
 import org.kevoree.telemetry.server.TelemetryServerKernel;
+import org.kevoree.telemetry.server.topichandlers.HandlingContext;
 import org.kevoree.telemetry.server.topichandlers.TopicHandler;
 import org.kevoree.telemetry.store.LogTicket;
 import org.kevoree.telemetry.store.Node;
@@ -26,30 +28,35 @@ public class NodeLogTopicHandler implements TopicHandler {
     }
 
     @Override
-    public String handleMessage(String topic, String payload, Queue<String> relativeTopic) {
+    public String handleMessage(HandlingContext ctx) {
+        try {
 
-        JsonObject jsonObject = JsonObject.readFrom(payload);
-        String nodeName = jsonObject.get("origin").asString();
+            JsonObject jsonObject = JsonObject.readFrom(ctx.payload);
+            String nodeName = jsonObject.get("origin").asString();
 
-        TelemetryTransaction transaction = TelemetryServerKernel.getTransactionManager().createTransaction();
-        TelemetryTimeView view = transaction.time(Long.valueOf(jsonObject.get("timestamp").asString()));
-        TelemetryStore store = (TelemetryStore) view.lookup("/");
-        Node node = store.findNodesByID(nodeName);
-        if (node == null) {
-            node = view.createNode().withName(nodeName);
-            store.addNodes(node);
-            Log.debug("Creating Node:" + node.getName());
+            TelemetryTransaction transaction = TelemetryServerKernel.getTransactionManager().createTransaction();
+            TelemetryTimeView view = transaction.time(Long.valueOf(jsonObject.get("timestamp").asString()));
+            TelemetryStore store = (TelemetryStore) view.lookup("/");
+            Node node = store.findNodesByID(nodeName);
+            if (node == null) {
+                node = view.createNode().withName(nodeName);
+                store.addNodes(node);
+                Log.debug("Creating Node:" + node.getName());
+            }
+
+            LogTicket ticket = node.getLog();
+            if (ticket != null) {
+                ticket.withMessage(jsonObject.get("message").asString()).withStack(jsonObject.get("stack").asString()).withType(jsonObject.get("type").asString()).withOrigin(jsonObject.get("origin").asString());
+            } else {
+                ticket = (LogTicket) view.createLogTicket().withMessage(jsonObject.get("message").asString()).withStack(jsonObject.get("stack").asString()).withType(jsonObject.get("type").asString()).withOrigin(jsonObject.get("origin").asString());
+                node.setLog(ticket);
+                Log.debug("Adding ticket");
+            }
+            transaction.commit();
+            return ticket.path();
+        } catch(ParseException ex) {
+            Log.error("Error when parsing payload:" + ctx.payload, ex);
+            return null;
         }
-
-        LogTicket ticket = node.getLog();
-        if (ticket != null) {
-            ticket.withMessage(jsonObject.get("message").asString()).withStack(jsonObject.get("stack").asString()).withType(jsonObject.get("type").asString()).withOrigin(jsonObject.get("origin").asString());
-        } else {
-            ticket = (LogTicket) view.createLogTicket().withMessage(jsonObject.get("message").asString()).withStack(jsonObject.get("stack").asString()).withType(jsonObject.get("type").asString()).withOrigin(jsonObject.get("origin").asString());
-            node.setLog(ticket);
-            Log.debug("Adding ticket");
-        }
-        transaction.commit();
-        return ticket.path();
     }
 }

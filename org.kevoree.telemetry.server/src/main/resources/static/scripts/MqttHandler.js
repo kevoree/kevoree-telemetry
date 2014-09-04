@@ -25,9 +25,10 @@ var MqttHandler = function(){
     var onMessage = function(msg) {
         var parsed = JSON.parse(msg.data);
         var active = $('.topicsTree').find('.active');
-        if(active != undefined) {
+        if(active.length != 0) {
             if(parsed.topic.indexOf(active.attr('data-topic').toLowerCase()) == 0) {
-                ConsoleHandler.addTicket(JSON.parse(parsed.payload));
+                var parsedPayload = JSON.parse(parsed.payload);
+                ConsoleHandler.addTicket(parsedPayload);
             }
         }
         TopicsHandler.messageReceived(parsed)

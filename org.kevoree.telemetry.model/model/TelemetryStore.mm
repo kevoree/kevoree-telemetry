@@ -35,20 +35,24 @@ class org.kevoree.telemetry.store.LogTicket : org.kevoree.telemetry.store.Ticket
 
 class org.kevoree.telemetry.store.MemoryInfoTicket : org.kevoree.telemetry.store.Ticket {
     pendingFinalization : Int
+    @contained
     heapMemory : org.kevoree.telemetry.store.MemoryInfo
+    @contained
     offHeapMemory : org.kevoree.telemetry.store.MemoryInfo
 }
 
 class org.kevoree.telemetry.store.MemoryInfo {
-    init : Int
-    committed : Int
-    max : Int
-    used : Int
+    init : Long
+    committed : Long
+    max : Long
+    used : Long
 }
 
 class org.kevoree.telemetry.store.RuntimeInfoTicket : org.kevoree.telemetry.store.Ticket {
     name : String
+    @contained
     vm : org.kevoree.telemetry.store.VmDetail
+    @contained
     spec : org.kevoree.telemetry.store.VmDetail
     bootClasspath : String
     classPath : String
@@ -56,7 +60,9 @@ class org.kevoree.telemetry.store.RuntimeInfoTicket : org.kevoree.telemetry.stor
     managementSpecVersion : String
     startTime : Long
     upTime : Long
-    inputArguments : org.kevoree.telemetry.store.KeyValuePair[0,*]
+    @contained
+    inputArguments : String[0,*]
+    @contained
     systemProperties : org.kevoree.telemetry.store.KeyValuePair[0,*]
 }
 
@@ -84,7 +90,9 @@ class org.kevoree.telemetry.store.ThreadInfoTicket : org.kevoree.telemetry.store
     threadCount : Int
     totalStartedThreadCount : Int
 
+    @contained
     allTherads : org.kevoree.telemetry.store.ThreadInfo[0,*]
+    @contained
     deadlockTherads : org.kevoree.telemetry.store.ThreadInfo[0,*]
 
 }
@@ -98,6 +106,7 @@ class  org.kevoree.telemetry.store.ThreadInfo {
     blockedTime : Long
     waitedCount : Int
     waitedTime : Long
+    @contained
     lockInfo : org.kevoree.telemetry.store.ThreadLockInfo
 }
 

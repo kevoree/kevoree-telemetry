@@ -8,11 +8,11 @@ import org.kevoree.modeling.datastores.leveldb.LevelDbDataStore;
 import org.kevoree.telemetry.factory.TelemetryTimeView;
 import org.kevoree.telemetry.factory.TelemetryTransaction;
 import org.kevoree.telemetry.factory.TelemetryTransactionManager;
+import org.kevoree.telemetry.server.topichandlers.HandlingContext;
 import org.kevoree.telemetry.server.topichandlers.NodeTopicHandler;
 import org.kevoree.telemetry.server.topichandlers.TopicHandler;
 import org.kevoree.telemetry.store.TelemetryStore;
 
-import java.awt.image.Kernel;
 import java.io.IOException;
 import java.util.*;
 
@@ -69,10 +69,15 @@ public class ExServer {
         Queue<String> relativeTopic = new ArrayDeque<String>();
         relativeTopic.addAll(Arrays.asList(topics));
 
+        HandlingContext ctx = new HandlingContext();
+        ctx.topic = topic;
+        ctx.relativeTopic = relativeTopic;
+        ctx.payload = payload;
+
         String chunck = relativeTopic.poll();
         TopicHandler handler = subHandlers.get(chunck);
         if(handler != null) {
-            return handler.handleMessage(topic, payload, relativeTopic);
+            return handler.handleMessage(ctx);
         } else {
             Log.warn("ExServer:: No topic handler found for chunk:"+chunck+" in topic:"+topic+" with payload:"+payload);
             return null;

@@ -15,28 +15,44 @@ var TopicsHandler = new function() {
 
     var refreshTopicsTree = function(parent, treeElement) {
         var ulElem = $("<ul></ul>");
+
         for(var i in treeElement) {
-            var e = treeElement[i];
-            var liElem = $("<li></li>");
-            var textSpan = $("<span>"+e.name+"</span>");
-            textSpan.attr('data-path', e.path);
-            var parentSpan = parent.find('span[data-topic]');
-            if(parentSpan.length != 0) {
-                textSpan.attr('data-topic', parentSpan.attr('data-topic') + "/" + e.name.toLowerCase());
+            var rootTopic = treeElement[i];
+
+            if(rootTopic.name.toLowerCase() == "nodes") {
+
+                var liRootElem = $("<li></li>");
+                var textSpanRoot = $("<span>"+rootTopic.name+"</span>");
+                textSpanRoot.attr('data-path', rootTopic.path);
+                textSpanRoot.attr('data-topic', rootTopic.name.toLowerCase());
+
+                textSpanRoot.appendTo(liRootElem);
+
+                var nodeListElem = $("<ul></ul>");
+                nodeListElem.appendTo(liRootElem);
+
+                for(var j in rootTopic.nodes) {
+                    var node = rootTopic.nodes[j];
+                    var liNodeElem = $("<li></li>");
+                    var textSpanNode = $("<span>"+node.name+"</span>");
+                    textSpanNode.attr('data-path', node.path);
+                    textSpanNode.attr('data-topic', "nodes/" + node.name.toLowerCase());
+                    textSpanNode.addClass("detailable");
+                    $(" <span class=\"badge pullright\" style=\"margin-left:10px;\">" + node.nbtickets + "</span>").appendTo(textSpanNode);
+                    textSpanNode.appendTo(liNodeElem);
+
+                    var shadowChildListElem = $("<ul></ul>");
+                    shadowChildListElem.appendTo(liNodeElem);
+
+                    liNodeElem.appendTo(nodeListElem);
+                }
+                liRootElem.appendTo(ulElem);
             } else {
-                textSpan.attr('data-topic', e.name.toLowerCase());
+                console.log("RootTopic unknown:" + rootTopic, treeElement);
             }
-            textSpan.appendTo(liElem);
-            if(e.hasOwnProperty('nbtickets')) {
-                textSpan.addClass("detailable");
-                $("<span class=\"badge pullright\">" + e.nbtickets + "</span>").appendTo(textSpan);
-            }
-            if(e.nodes !== 'undefined') {
-                refreshTopicsTree(liElem, e.nodes);
-            }
-            liElem.appendTo(ulElem);
         }
         ulElem.appendTo(parent);
+
     };
 
     var registerTreeClickListeners = function(tree) {
@@ -77,53 +93,41 @@ var TopicsHandler = new function() {
 
     var messageReceived = function(parsed) {
         var topics = parsed.topic.split("/");
-        var currentTopic = topics[0];
-        if(currentTopic.length == 2) {
+        var rootTopic = topics[0];
+
+        if(rootTopic == "nodes") {
+            var nodeName = topics[1];
             var topicTree = $(".topicsTree");
             var ul = topicTree.find("ul").first();
             if(ul.length == 0) {
                 ul = $('<ul></ul>');
                 ul.appendTo(topicTree);
             }
-            for(var i = 0; i < topics.length; i++) {
-                if(i==0) {
-                    currentTopic = topics[i];
-                } else {
-                    currentTopic = currentTopic + "/" + topics[i];
-                }
-                var li = ul.find('li > span[data-topic="'+currentTopic+'"]').parent("li");
-                if(li.length == 0) {
-                    li = $("<li></li>");
-                    li.appendTo(ul);
-                    var textSpan = $("<span>"+topics[i]+"</span>");
-                    if(i == topics.length -1) {
-                        textSpan.attr('data-path', parsed.path.substring(0,parsed.path.lastIndexOf("/")));
-                    }
-                    textSpan.attr('data-topic', currentTopic);
-                    textSpan.appendTo(li);
-                    ul = $('<ul></ul>');
-                    ul.appendTo(li);
-                    if(i == topics.length-1) {
-                        textSpan.addClass("detailable");
-                        var span = $("<span class=\"badge pullright\">0</span>");
-                        span.appendTo(textSpan);
-                        registerTreeClickListeners(topicTree);
-                    }
-                }
-                if(i == topics.length-1) {
-                    var badge = li.find("span.badge");
-                    badge.text(parseInt(badge.text())+1);
-                } else {
-                    ul = li.find("ul").first();
-                    if(ul.length == 0) {
-                        ul = $('<ul></ul>');
-                        ul.appendTo(li);
-                    }
-                }
+
+            var li = ul.find('li > span[data-topic="'+rootTopic + "/" + nodeName+'"]').parent("li");
+            if(li.length == 0) {
+                li = $("<li></li>");
+                li.appendTo(ul);
+                var textSpan = $("<span>"+nodeName+"</span>");
+                textSpan.attr('data-path', "/nodes["+nodeName+"]");
+                textSpan.attr('data-topic', rootTopic + "/" + nodeName);
+                textSpan.appendTo(li);
+                ul = $('<ul></ul>');
+                ul.appendTo(li);
+                textSpan.addClass("detailable");
+                var span = $("<span class=\"badge pullright\" style=\"margin-left:10px;\">0</span>");
+                span.appendTo(textSpan);
+                ul = $('<ul></ul>');
+                ul.appendTo(li);
+                registerTreeClickListeners(topicTree);
             }
+            var badge = li.find("span.badge");
+            badge.text(parseInt(badge.text())+1);
+
         } else {
-            console.log("Message Received:", parsed)
+            console.log("Unknown root topic:" + parsed.topic);
         }
+
     };
 
 
