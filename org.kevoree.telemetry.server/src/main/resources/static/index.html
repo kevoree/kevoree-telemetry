@@ -7,8 +7,15 @@
 
     <script src="//code.jquery.com/jquery-2.1.1.min.js"></script>
     <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+
+    <script src="http://code.highcharts.com/highcharts.js"></script>
+    <script src="http://code.highcharts.com/highcharts-more.js"></script>
+
+    <script src="http://code.highcharts.com/modules/solid-gauge.src.js"></script>
+
     <script src="scripts/TopicsHandler.js"></script>
-    <script src="scripts/ConsoleHandler.js"></script>
+    <script src="scripts/ConsoleTabHandler.js"></script>
+    <script src="scripts/MemoryTabHandler.js"></script>
     <script src="scripts/MqttHandler.js"></script>
 
 </head>
@@ -25,7 +32,7 @@
         <div class="col-md-7">
             <div id="detailContainer">
                 <div id="detailsHeader"></div>
-                <ul class="nav nav-tabs" role="tablist">
+                <ul class="nav nav-tabs" role="tablist" id="detailsTabs">
                     <li class="active"><a href="#console" data-toggle="tab"><h3 class="panel-title">Console</h3></a></li>
                     <li><a href="#memory" data-toggle="tab"><h3 class="panel-title">Memory</h3></a></li>
                     <li><a href="#cpu" data-toggle="tab"><h3 class="panel-title">CPU</h3></a></li>
@@ -44,7 +51,18 @@
                             <div id="consoleContents"></div>
                         </div>
                     </div>
-                    <div class="tab-pane fade" id="memory"><h2>SooN</h2></div>
+                    <div class="tab-pane fade" id="memory">
+                        <div class="panel-heading" >
+                        </div>
+                        <div class="panel-body">
+                            <div id="memoryContents">
+                                <div id="heapGauge" style="display:inline-block;width:250px;height:250px;"></div>
+                                <div id="heapHistory" style="display:inline-block;width:450px;height:250px;"></div>
+                                <div id="offHeapGauge" style="display:inline-block;width:250px;height:250px;"></div>
+                                <div id="offHeapHistory" style="display:inline-block;width:450px;height:250px;"></div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="tab-pane fade" id="cpu"><h2>SooN</h2></div>
                     <div class="tab-pane fade" id="threads"><h2>SooN</h2></div>
                 </div>
@@ -60,7 +78,7 @@
     $(document).ready(function() {
         TopicsHandler.init();
         MqttHandler.init();
-        ConsoleHandler.init();
+        ConsoleTabHandler.init();
     });
 </script>
 </body>

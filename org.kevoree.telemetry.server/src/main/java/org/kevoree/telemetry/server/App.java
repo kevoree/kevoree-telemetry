@@ -100,8 +100,6 @@ public class App {
         });
 
 
-
-
         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
             public void run() {
                 TelemetryServerKernel.getDashboardServer().stop();

@@ -2,6 +2,7 @@ package org.kevoree.telemetry.server.dashboard.handlers;
 
 import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
+import io.undertow.io.IoCallback;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.form.FormData;
@@ -9,6 +10,7 @@ import io.undertow.server.handlers.form.FormDataParser;
 import io.undertow.server.handlers.form.FormParserFactory;
 import io.undertow.util.Headers;
 import io.undertow.util.Methods;
+import org.kevoree.log.Log;
 import org.kevoree.modeling.api.time.TimeWalker;
 import org.kevoree.telemetry.factory.TelemetryTimeView;
 import org.kevoree.telemetry.factory.TelemetryTransaction;
@@ -16,6 +18,8 @@ import org.kevoree.telemetry.server.TelemetryServerKernel;
 import org.kevoree.telemetry.store.LogTicket;
 import org.kevoree.telemetry.store.Node;
 import org.kevoree.telemetry.store.TelemetryStore;
+
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -29,7 +33,7 @@ public class TopicsRequestHandler implements HttpHandler {
         if(httpServerExchange.getRequestMethod() == Methods.GET) {
             httpServerExchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/json");
             TelemetryTransaction transaction = TelemetryServerKernel.getTransactionManager().createTransaction();
-            TelemetryTimeView view = transaction.time(System.nanoTime()/1000);
+            TelemetryTimeView view = transaction.time(System.currentTimeMillis() * 1000);
             TelemetryStore store = (TelemetryStore) view.lookup("/");
 
             JsonArray response = new JsonArray();
@@ -40,7 +44,7 @@ public class TopicsRequestHandler implements HttpHandler {
             response.add(rootTopic);
             String sending = response.toString();
             //Log.debug(sending);
-            httpServerExchange.getResponseSender().send(sending);
+            httpServerExchange.getResponseSender().send(sending, IoCallback.END_EXCHANGE);
         } else if(httpServerExchange.getRequestMethod() == Methods.POST) {
 
             FormData formData = httpServerExchange.getAttachment(FormDataParser.FORM_DATA);
@@ -50,7 +54,8 @@ public class TopicsRequestHandler implements HttpHandler {
             } else  {
                 String path = formData.get("path").getFirst().getValue();
                 TelemetryTransaction transaction = TelemetryServerKernel.getTransactionManager().createTransaction();
-                TelemetryTimeView view = transaction.time(System.nanoTime()/1000);
+                TelemetryTimeView view = transaction.time(System.currentTimeMillis() * 1000);
+
                 Node topic  = (Node) view.lookup(path);
                 if(topic != null) {
                     JsonObject response = new JsonObject();
@@ -72,7 +77,7 @@ public class TopicsRequestHandler implements HttpHandler {
                     }
                     response.add("tickets",ticketsArray);
                     String sending = response.toString();
-                    httpServerExchange.getResponseSender().send(sending);
+                    httpServerExchange.getResponseSender().send(sending, IoCallback.END_EXCHANGE);
                 }
             }
 

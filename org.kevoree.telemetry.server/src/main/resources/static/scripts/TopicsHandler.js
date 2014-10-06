@@ -70,9 +70,9 @@ var TopicsHandler = new function() {
         });
 
         tree.find('.detailable').on('click', function(){
-            updateDetails(this);
             tree.find('.active').removeClass('active');
             $(this).addClass('active');
+            updateDetails(this);
         });
     };
 
@@ -82,12 +82,13 @@ var TopicsHandler = new function() {
             .done(function(msg){
                 var parsed = JSON.parse(msg);
                 if(parsed.hasOwnProperty('tickets')) {
-                    ConsoleHandler.replaceContent(parsed.tickets);
+                    ConsoleTabHandler.replaceContent(parsed.tickets);
                 }
             })
             .error(function(err){
                 console.log("Failed to collect details:", err);
             });
+        MemoryTabHandler.init();
     };
 
 
@@ -98,10 +99,11 @@ var TopicsHandler = new function() {
         if(rootTopic == "nodes") {
             var nodeName = topics[1];
             var topicTree = $(".topicsTree");
-            var ul = topicTree.find("ul").first();
+            var nodesLi = topicTree.find('li > span[data-topic="'+rootTopic+'"]').parent("li");
+            var ul = nodesLi.find("ul");
             if(ul.length == 0) {
                 ul = $('<ul></ul>');
-                ul.appendTo(topicTree);
+                ul.appendTo(nodesLi);
             }
 
             var li = ul.find('li > span[data-topic="'+rootTopic + "/" + nodeName+'"]').parent("li");
@@ -112,8 +114,6 @@ var TopicsHandler = new function() {
                 textSpan.attr('data-path', "/nodes["+nodeName+"]");
                 textSpan.attr('data-topic', rootTopic + "/" + nodeName);
                 textSpan.appendTo(li);
-                ul = $('<ul></ul>');
-                ul.appendTo(li);
                 textSpan.addClass("detailable");
                 var span = $("<span class=\"badge pullright\" style=\"margin-left:10px;\">0</span>");
                 span.appendTo(textSpan);

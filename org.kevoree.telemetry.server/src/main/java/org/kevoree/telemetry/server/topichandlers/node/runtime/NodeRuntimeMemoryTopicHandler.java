@@ -60,7 +60,7 @@ public class NodeRuntimeMemoryTopicHandler implements TopicHandler {
                 offHeapInfos = view.createMemoryInfo();
                 ticket.setOffHeapMemory(offHeapInfos);
             }
-            JsonObject offHeapInfosJson = message.get("heapMemory").asObject();
+            JsonObject offHeapInfosJson = message.get("offHeapMemory").asObject();
             offHeapInfos.withInit(offHeapInfosJson.get("init").asLong()).withCommitted(offHeapInfosJson.get("committed").asLong()).withMax(offHeapInfosJson.get("max").asLong()).withUsed(offHeapInfosJson.get("used").asLong());
 
             ticket.setPendingFinalization(message.get("pendingFinalization").asInt());

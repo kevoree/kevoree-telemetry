@@ -29,7 +29,7 @@
     </parent>
 
     <properties>
-        <kmf.version>3.5.1-SNAPSHOT</kmf.version>
+        <kmf.version>3.5.11-SNAPSHOT</kmf.version>
     </properties>
 
     <developers>
@@ -85,8 +85,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.1</version>
                 <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
+                    <source>8</source>
+                    <target>8</target>
                 </configuration>
             </plugin>
             <plugin>

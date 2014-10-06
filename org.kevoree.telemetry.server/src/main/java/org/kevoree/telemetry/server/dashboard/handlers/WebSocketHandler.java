@@ -2,19 +2,25 @@ package org.kevoree.telemetry.server.dashboard.handlers;
 
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
+import io.undertow.io.DefaultIoCallback;
 import io.undertow.websockets.WebSocketConnectionCallback;
 import io.undertow.websockets.core.*;
 import io.undertow.websockets.spi.WebSocketHttpExchange;
 import org.kevoree.log.Log;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Created by gregory.nain on 28/08/2014.
  */
 public class WebSocketHandler implements WebSocketConnectionCallback {
-    private HashMap<String, WebSocketChannel> connections = new HashMap<String, WebSocketChannel>();
+    private HashMap<String, List<WebSocketChannel>> connections = new HashMap<String, List<WebSocketChannel>>();
+    private ExecutorService exec = Executors.newFixedThreadPool(5);
 
     @Override
     public void onConnect(WebSocketHttpExchange webSocketHttpExchange, WebSocketChannel webSocketChannel) {
@@ -30,21 +36,22 @@ public class WebSocketHandler implements WebSocketConnectionCallback {
                     if(sub.contains("#")) {
                         sub = sub.substring(0, sub.lastIndexOf("#"));
                     }
-                    connections.put(sub, channel);
+                    connections.computeIfAbsent(sub, t -> new ArrayList<>()).add(channel);
                     Log.debug("Registered channel on topic:" + val.asString() + "->"+ sub);
                 }
             }
 
             @Override
-            protected void onClose(WebSocketChannel webSocketChannel, StreamSourceFrameChannel channel) throws IOException {
+            protected void onClose(final WebSocketChannel webSocketChannel, StreamSourceFrameChannel channel) throws IOException {
                 super.onClose(webSocketChannel, channel);
-                connections.remove(channel);
+                connections.values().forEach(lst -> lst.remove(webSocketChannel));
+
             }
 
             @Override
             protected void onError(WebSocketChannel channel, Throwable error) {
                 super.onError(channel, error);
-                connections.remove(channel);
+                connections.values().forEach(lst -> lst.remove(channel));
             }
         });
         webSocketChannel.resumeReceives();
@@ -55,11 +62,16 @@ public class WebSocketHandler implements WebSocketConnectionCallback {
         obj.add("topic", tpc);
         obj.add("path", path);
         obj.add("payload", payload);
-        String msg = obj.toString();
-        for(String subscription : connections.keySet()) {
-            if(tpc.startsWith(subscription)) {
-                WebSockets.sendText(msg, connections.get(subscription), null);
-            }
-        }
+        final String msg = obj.toString();
+        connections.keySet().forEach(subscription -> {
+                    if (tpc.startsWith(subscription)) {
+                        for (final WebSocketChannel chan : connections.get(subscription)) {
+                            exec.execute(() -> {
+                                WebSockets.sendText(msg, chan, null);
+                            });
+                        }
+                    }
+                }
+        );
     }
 }
